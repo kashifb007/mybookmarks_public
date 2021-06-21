@@ -4,14 +4,16 @@ namespace App\DataFixtures;
 
 use App\Entity\Role;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class RoleFixtures extends Fixture
+class RoleFixtures extends Fixture implements FixtureGroupInterface
 {
     public function load(ObjectManager $manager)
     {
-        $role = (new Role())->setName('Admin');
-        $manager->persist($role);
+        $adminRole = (new Role())->setName('Admin');
+        $manager->persist($adminRole);
+        $this->setReference('ROLE_ADMIN', $adminRole);
 
         $role = (new Role())->setName('Standard');
         $manager->persist($role);
@@ -38,5 +40,10 @@ class RoleFixtures extends Fixture
         $manager->persist($role);
 
         $manager->flush();
+    }
+
+    public static function getGroups(): array
+    {
+        return ['Default', 'Test'];
     }
 }
