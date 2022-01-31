@@ -11,7 +11,6 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * @ORM\Entity(repositoryClass=RoleRepository::class)
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", hardDelete=false)
- * @Gedmo\Loggable()
  */
 class Role
 {

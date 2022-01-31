@@ -32,7 +32,8 @@ class UserFixtures extends Fixture implements FixtureGroupInterface, DependentFi
             ->setFirstname('Kashif')
             ->setSurname('Bhatti')
             ->setEmail('kash@dreamsites.co.uk')
-            ->setRole($this->getReference('ROLE_ADMIN'));
+            ->setRole($this->getReference('ROLE_ADMIN'))
+            ->setStatus($this->getReference('STATUS_LIVE'));
 
         $user->setPassword($this->passwordEncoder->encodePassword(
             $user,
@@ -47,7 +48,7 @@ class UserFixtures extends Fixture implements FixtureGroupInterface, DependentFi
     {
         return array(
             RoleFixtures::class,
-            StatusFixtures::class
+            UserStatusFixtures::class
         );
     }
 

@@ -31,11 +31,13 @@ class UserStatus
 
     /**
      * @ORM\Column(type="datetime", name="created_at")
+     * @Gedmo\Timestampable(on="create")
      */
     private $createdAt;
 
     /**
      * @ORM\Column(type="datetime", name="updated_at")
+     * @Gedmo\Timestampable(on="update")
      */
     private $updatedAt;
 

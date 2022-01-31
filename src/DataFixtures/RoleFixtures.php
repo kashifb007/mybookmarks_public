@@ -15,6 +15,9 @@ class RoleFixtures extends Fixture implements FixtureGroupInterface
         $manager->persist($adminRole);
         $this->setReference('ROLE_ADMIN', $adminRole);
 
+        $role = (new Role())->setName('Author');
+        $manager->persist($role);
+
         $role = (new Role())->setName('Standard');
         $manager->persist($role);
 

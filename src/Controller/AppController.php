@@ -32,7 +32,7 @@ class AppController extends AbstractController
     /**
      * AppController constructor.
      * @param RoleService $service
-     * @param UserPasswordHasherInterface $passwordHasher
+     * @param UserPasswordEncoderInterface $passwordEncoder
      */
     public function __construct(RoleService $service,
                                 UserPasswordEncoderInterface $passwordEncoder)
@@ -71,7 +71,9 @@ class AppController extends AbstractController
     {
 
         $user = new User();
-        $role = $this->service->fetchOne('Admin');
+
+        /** @var Role $role */
+        $role = $this->service->fetchOne('Standard');
 
         $user->setRole($role);
         $form = $this->createForm(RegisterFormType::class, $user, [

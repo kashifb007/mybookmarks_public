@@ -9,7 +9,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Component\Security\Core\Security;
@@ -19,7 +18,7 @@ use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
-
+use \Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 /**
  * @ORM\Embedded
  */
@@ -41,7 +40,10 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
      * @param CsrfTokenManagerInterface $csrfTokenManager
      * @param UserPasswordEncoderInterface $passwordEncoder
      */
-    public function __construct(EntityManagerInterface $entityManager, UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager, UserPasswordEncoderInterface $passwordEncoder)
+    public function __construct(EntityManagerInterface $entityManager,
+                                UrlGeneratorInterface $urlGenerator,
+                                CsrfTokenManagerInterface $csrfTokenManager,
+                                UserPasswordEncoderInterface $passwordEncoder)
     {
         $this->entityManager = $entityManager;
         $this->urlGenerator = $urlGenerator;
@@ -57,6 +59,12 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
 
     public function getCredentials(Request $request)
     {
+        $isLoginRequest = $request->getPathInfo() === '/login' && $request->isMethod('POST');
+
+        if(!$isLoginRequest) {
+            return;
+        }
+
         $credentials = [
             'username' => $request->request->get('username'),
             'password' => $request->request->get('password'),
@@ -77,9 +85,11 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
             throw new InvalidCsrfTokenException();
         }
 
-        $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => $credentials['username']]);
+        $fieldType = filter_var($credentials['username'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
-        if (!$user) {
+        if ($fieldType === 'username') {
+            $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => $credentials['username']]);
+        } else {
             $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $credentials['username']]);
         }
 
@@ -97,6 +107,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
         // If there are no credentials to check, you can just return true
 
         $password = $credentials['password'];
+        /** @var User $user */
         $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => $credentials['username']]);
         if (!$user) {
             $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $credentials['username']]);
@@ -106,7 +117,9 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
         }
 
         $encoderService = $this->passwordEncoder;
+        //$match = $encoderService->isPasswordValid($user, $password);
         $match = $encoderService->isPasswordValid($user, $password);
+
 
         if ($match) {
             return true;
